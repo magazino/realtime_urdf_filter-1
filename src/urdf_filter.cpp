@@ -595,13 +595,6 @@ void RealtimeURDFFilter::render (const double* camera_projection_matrix, ros::Ti
   transform.inverse().getOpenGLMatrix(glTf);
   glMultMatrixd((GLdouble*)glTf);
 
-  // Apply camera to "fixed frame" transform (world coordinates)
-  tf::Vector3 right = tf::Transform(camera_transform.getRotation()) * tf::Vector3 (1,0,0);
-  camera_transform.setOrigin(camera_transform.getOrigin() + (right * camera_tx_));
-  tf::Vector3 down = tf::Transform(camera_transform.getRotation()) * tf::Vector3 (0,1,0);
-  camera_transform.setOrigin(camera_transform.getOrigin() + (down * camera_ty_));
-
-
   camera_transform.getOpenGLMatrix(glTf);
   glMultMatrixd((GLdouble*)glTf);
   
