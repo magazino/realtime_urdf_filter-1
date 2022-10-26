@@ -483,7 +483,7 @@ void RealtimeURDFFilter::getProjectionMatrix (
   glTf[5]= 2.0 * fy / height_;
 
   glTf[8]= 2.0 * (0.5 - cx / width_);
-  glTf[9]= 2.0 * (cy / height_ - 0.5);
+  glTf[9]= 2.0 * (0.5 - cy / height_);
 
   glTf[10]= - (far_plane_ + near_plane_) / (far_plane_ - near_plane_);
   glTf[14]= -2.0 * far_plane_ * near_plane_ / (far_plane_ - near_plane_);
