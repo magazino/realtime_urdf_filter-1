@@ -196,7 +196,7 @@ public:
     if (buffer == 0)
     {
       std::cout << "(re)allocating depth buffer" << std::endl;
-      buffer = (float*) malloc (depthMap.XRes() * depthMap.YRes() * sizeof(float));
+      buffer = (float*) calloc (depthMap.XRes() * depthMap.YRes(), sizeof(float));
     }
     for (XnUInt y = 0; y < depthMap.YRes(); y++)
     {
