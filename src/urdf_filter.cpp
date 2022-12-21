@@ -168,7 +168,12 @@ void RealtimeURDFFilter::loadModels ()
 
       // finally, set the model description so we can later parse it.
       ROS_INFO ("Loading URDF model: %s", description_param.c_str ());
-      renderers_.push_back (new URDFRenderer (content, tf_prefix, cam_frame_, fixed_frame_, tf_));
+      std::shared_ptr<URDFRenderer> renderer = std::make_shared<URDFRenderer>(
+          content, tf_prefix, cam_frame_, fixed_frame_, tf_);
+      if (renderer->getNumRenderables())
+      {
+        renderers_.push_back(renderer);
+      }
     }
   }
   else
@@ -348,7 +353,8 @@ unsigned char* RealtimeURDFFilter::bufferFromDepthImage (cv::Mat1f depth_image)
     // Allocate the buffer
     if (buffer == NULL) {
       std::cout << "(re)allocating opengl depth buffer" << std::endl;
-      buffer = (unsigned char*) malloc(row_size * depth_image.rows);
+      buffer = (unsigned char*) calloc(row_size * depth_image.rows,
+                                       sizeof(unsigned char));
     }
 
     // Copy the image row by row
@@ -404,7 +410,7 @@ void RealtimeURDFFilter::initGL ()
 
   // Make sure we loaded something!
   if(renderers_.empty()) { 
-    throw std::runtime_error("Could not load any models for filtering!");
+    ROS_ERROR_STREAM("Could not load any models for filtering!");
   } else {
     ROS_INFO_STREAM("Loaded "<<renderers_.size()<<" models for filtering.");
   }
@@ -419,9 +425,9 @@ void RealtimeURDFFilter::initGL ()
   }
 
   // Alocate buffer for the masked depth image (float)
-  masked_depth_ = (GLfloat*) malloc(width_ * height_ * sizeof(GLfloat));
+  masked_depth_ = (GLfloat*) calloc(width_ * height_, sizeof(GLfloat));
   // Alocate buffer for the mask (uchar)
-  mask_ = (GLubyte*) malloc(width_ * height_ * sizeof(GLubyte));
+  mask_ = (GLubyte*) calloc(width_ * height_, sizeof(GLubyte));
 
   ROS_INFO("URDF filter set up");
 }
@@ -624,7 +630,7 @@ void RealtimeURDFFilter::render (const double* camera_projection_matrix, ros::Ti
   glBindTexture (GL_TEXTURE_BUFFER, depth_texture_);
 
   // render every renderable / urdf model
-  std::vector<URDFRenderer*>::const_iterator r;
+  std::vector<std::shared_ptr<URDFRenderer>>::const_iterator r;
   for (r = renderers_.begin (); r != renderers_.end (); r++) {
     (*r)->render (timestamp);
   }

@@ -66,16 +66,21 @@ namespace realtime_urdf_filter
       ROS_ERROR ("URDF failed Model parse");
       return;
     }
-
     ROS_INFO ("URDF parsed OK");
-    loadURDFModel (model);
+
+    if (!loadURDFModel(model))
+    {
+      ROS_ERROR("URDF failed loading meshes");
+      renderables_.clear();
+      return;
+    }
     ROS_INFO ("URDF loaded OK");
   }
 
 
   /// /////////////////////////////////////////////////////////////////////////////
   /// @brief load URDF model description from string and create search operations data structures
-  void URDFRenderer::loadURDFModel
+  bool URDFRenderer::loadURDFModel
     (urdf::Model &model)
   {
     typedef std::vector<std::shared_ptr<urdf::Link> > V_Link;
@@ -85,16 +90,18 @@ namespace realtime_urdf_filter
     V_Link::iterator it = links.begin();
     V_Link::iterator end = links.end();
 
+    bool no_error = true;
     for (; it != end; ++it)
-      process_link (*it);
+      no_error = process_link(*it) && no_error;
+    return no_error;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   /** \brief Processes a single URDF link, creates renderable for it */
-  void URDFRenderer::process_link (std::shared_ptr<urdf::Link> link)
+  bool URDFRenderer::process_link (std::shared_ptr<urdf::Link> link)
   {
     if (link->visual.get() == NULL || link->visual->geometry.get() == NULL)
-      return;
+      return true;
 
     std::shared_ptr<Renderable> r;
     if (link->visual->geometry->type == urdf::Geometry::BOX)
@@ -117,6 +124,11 @@ namespace realtime_urdf_filter
       std::shared_ptr<urdf::Mesh> mesh = std::dynamic_pointer_cast<urdf::Mesh> (link->visual->geometry);
       std::string meshname (mesh->filename);
       RenderableMesh* rm = new RenderableMesh (meshname);
+      if (!rm->getNumMeshes())
+      {
+        delete rm;
+        return false;
+      }
       rm->setScale (mesh->scale.x, mesh->scale.y, mesh->scale.z);
       r.reset (rm);
     }
@@ -130,6 +142,7 @@ namespace realtime_urdf_filter
         (link->visual->material))
       r->color  = link->visual->material->color;
     renderables_.push_back (r); 
+    return true;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +178,10 @@ namespace realtime_urdf_filter
       (*it)->render ();
   }
 
+  size_t URDFRenderer::getNumRenderables() const
+  {
+    return renderables_.size();
+  }
 }
 
 // REGEX BASED LINK / SEARCH OPERATIONS / TARGET FRAMES SETUP

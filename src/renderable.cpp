@@ -356,6 +356,11 @@ namespace realtime_urdf_filter
     }
   }
 
+  size_t RenderableMesh::getNumMeshes() const
+  {
+    return meshes.size();
+  }
+
   void RenderableMesh::initMesh (unsigned int index, const aiMesh* mesh, const aiNode* node)
   {
     // TODO: mesh->mMaterialIndex

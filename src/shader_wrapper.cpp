@@ -151,7 +151,7 @@ std::string ShaderWrapper::load_text_file (std::string file_name)
     return "";
   }
   
-  char* buf = (char*) malloc (sizeof(char) * (res.size + 1));
+  char* buf = (char*) calloc (res.size + 1, sizeof(char));
   memcpy (buf, res.data.get(), res.size);
   buf[res.size] = 0;
 

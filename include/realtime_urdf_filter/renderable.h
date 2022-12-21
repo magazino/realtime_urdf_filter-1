@@ -110,6 +110,7 @@ struct RenderableMesh : public Renderable
 
   virtual void render ();
   void setScale (float x, float y, float z);
+  size_t getNumMeshes() const;
 
 private:
   struct Vertex

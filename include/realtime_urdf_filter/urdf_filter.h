@@ -107,7 +107,7 @@ class RealtimeURDFFilter
     GLuint depth_texture_;
 
     // vector of renderables
-    std::vector<URDFRenderer*> renderers_;
+    std::vector<std::shared_ptr<URDFRenderer>> renderers_;
 
     // parameters from launch file
     tf::Vector3 camera_offset_t_;
